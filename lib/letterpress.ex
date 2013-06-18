@@ -82,7 +82,7 @@ defmodule Letterpress do
       top_words = get_top_words dict, board
       best_word_score = Enum.at top_words, 0
 
-      Board.play dict, board, player, enum(best_word_score, 0)
+      Board.play dict, board, player, elem(best_word_score, 0)
       best_word_score
     end
 
@@ -164,13 +164,12 @@ defmodule Letterpress do
   #   def played_words
   #     @board.played_words
   #   end
-    def _consider(top_words, word_score) when length(top_words) < 40 || elem word_score, 1 > List.last top_words do
-      insert_position = Enum.find_index top_words, fn(word_score2) -> enum word_score2, 1 < enum word_score, 1 end
-      top_words = List.insert_at(top_words, insert_position, word_score)
-      List.delete(top_words, Enum.at(top_words, 40))
-    end
-
     def _consider(top_words, word_score) do
+      if length(top_words) < 40 || elem(word_score, 1) > List.last top_words do
+        insert_position = Enum.find_index top_words, fn(word_score2) -> elem word_score2, 1 < elem word_score, 1 end
+        top_words = List.insert_at(top_words, insert_position, word_score)
+        List.delete(top_words, Enum.at(top_words, 40))
+      end
     end
 
     def is_top_word?(top_words, word) do
@@ -203,10 +202,10 @@ start_at = Time.now
 # dict2 = '/usr/share/dict/sowpods.txt.gz | gunzip | tr A-Z a-z'
 # dict3 = '/usr/share/dict/twl.txt.gz | gunzip | tr A-Z a-z'
 
+IO.puts "loading dictionary. Please wait.."
 dictionary = Letterpress.Dictionary.load('/usr/share/dict/twl.txt.gz | gunzip | tr A-Z a-z')
 
-{_,{hour2,min2,sec2}} = :erlang.localtime()
-end_at = hour2 * 3600 + min2 * 60 + sec2
+end_at = Time.now
 
 IO.puts "dictionary loaded in #{end_at - start_at}s"
 
