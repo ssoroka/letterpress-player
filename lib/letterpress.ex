@@ -203,15 +203,23 @@ start_at = Time.now
 # dict3 = '/usr/share/dict/twl.txt.gz | gunzip | tr A-Z a-z'
 
 IO.puts "loading dictionary. Please wait.."
-dictionary = Letterpress.Dictionary.load('/usr/share/dict/twl.txt.gz | gunzip | tr A-Z a-z')
+case File.read('dictionary.bin') do
+{:ok, binary} ->
+  dictionary = binary_to_term(binary)
+{:error, reason} ->
+  dictionary = Letterpress.Dictionary.load('/usr/share/dict/twl.txt.gz | gunzip | tr A-Z a-z')
+  IO.puts "Saving dictionary in binary format for later."
+  File.write('dictionary.bin', term_to_binary(dictionary))
+end
 
 end_at = Time.now
 
 IO.puts "dictionary loaded in #{end_at - start_at}s"
 
-IO.puts "is apple a word? #{Letterpress.Dictionary.is_word?("apple", dictionary)}"
-IO.puts "is stove a word? #{Letterpress.Dictionary.is_word?("stove", dictionary)}"
-IO.puts "is meerkaadf a word? #{Letterpress.Dictionary.is_word?("meerkaadf", dictionary)}"
+test_words = %w(apple stove meerkaadf beer elephant sicophant sycophant)
+Enum.each test_words, fn(word) ->
+  IO.puts "is #{word} a word? #{Letterpress.Dictionary.is_word?(word, dictionary)}"
+end
 
 # board =
 
